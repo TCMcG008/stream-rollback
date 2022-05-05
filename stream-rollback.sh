@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#   stream-rollback.sh          version: 2022-04-20A                          #
+#   stream-rollback.sh          version: 2022-05-05A                          #
 #   created by TCMcG008                                                       #
 #                                                                             #
 #   based on stream2alma.sh     version: 2022-03-27                           #
@@ -14,6 +14,7 @@
 #     script to:                                                              #
 #       1. roll CentOS Stream back to CentOS 8.5                              #
 #       2. fix EDD 'bugs' in grub.cfg                                         #
+#       3. [optional] download a RHEL-clone installation script               # 
 #                                                                             #
 #   references:                                                               #
 #     https://www.linuxquestions.org/questions/linux-virtualization-and-cloud-90/probing-edd-edd-off-to-disable-ok-4175607672/
@@ -22,14 +23,6 @@
 ###############################################################################
 
 PROGNAME=$(basename $0)
-
-# test if user is root:
-if [[ $UID != 0 ]]; then
-	echo "You must be logged is as the root user to use this script. "
-	echo "If you do not have the credentials to become the root user, contact a Domain or Systems Administrator."
-	echo "Exiting..."
-	exit 1
-fi
 
 # define usage:
 usage () {
@@ -45,8 +38,13 @@ usage () {
 
  	$PROGNAME	script to convert a CentOS Stream environment to a stable Alma machine
  
-	$PROGNAME
-		-h | --help		prints this menu
+	$PROGNAME [ -h | --help | -R | --rocky | -A | --alma ]
+		-h | --help     prints this menu
+		-R | --rocky    downloads the current Rocky Linux deployment script
+		-A | --alma     downloads the current AlmaLinux deployment script
+		
+	NOTE: the script will only d/l the choice; it will not install it.  This must \
+	be done manually, after reboot.  
 
 	reference materials for this script:
 	https://gist.github.com/grizz/e3668652c0f0b121118ce37d29b06dbf
@@ -57,61 +55,82 @@ EOF
  	return
 }
 
+# test if user is root:
+if [[ $UID != 0 ]]; then
+	echo "You must be logged is as the root user to use this script. "
+	echo "If you do not have the credentials to become the root user, contact a Domain or Systems Administrator."
+	echo "Exiting..."
+	exit 1
+fi
+
 if [[ $# > 0 ]]; then
-	usage >&2
-	exit 3
+	case "${1}" in
+		-h|--help)		usage >&2
+						exit 3
+						;;
+		-R|--rocky)		RHEL_Clone='Rocky Linux'
+						RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
+						;;
+		-A|--alma)		RHEL_Clone='AlmaLinux' 
+						RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
+						;;
+		*)				echo "Not a valid option; exiting... "
+						usage >&2
+						exit 3
+						;;
+	esac
 fi
 
-if [[ ! `which wget` ]]; then
-	yum -y install wget
+if [[ $RHEL_CLONE ]]; then 
+	if [[ ! `which wget` ]]; then
+		yum -y install wget
+	fi
+	
+	cd ~/bin
+	echo "Downloading the deployment script for $RHEL_CLONE ..."
+	wget $RURL_Clone
+	chmod +x `basename ${RURL_Clone}`
+	cd -
 fi
-
-cd ~/bin
-wget https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh
-# NOTE: add choice before d/l?
-chmod +x *
-cd -
 
 RepoDIR=/etc/yum.repos.d
 cd $RepoDIR
 REPOS=`ls $RepoDIR | egrep '^CentOS-' | sed -e 's/^.*-//g' -e 's/\.repo$//g'`
-# REPOS='BaseOS AppStream ContinuousRelease Devel Extras FastTrack HighAvailability Plus PowerTools'
 echo $REPOS
 
 
 # if CentOS-Linux repos do not exist, create symbolic links:
 for REPO in $REPOS; do
 	repo=`echo $REPO | tr [:upper:] [:lower:]`
-	# customize for non-matching repo-names:
+
+	# PLEASE NOTE: certain repositories, like ContinuousRelease or HighAvailability may not work with the scripting due to differing names;
+	# this "hack" customizes for non-matching repo-names; edit / copy as needed:
 	if [[ $REPO == "HighAvailability" ]]; then
 		repo=ha
 	fi
 	if [[ $REPO == "ContinuousRelease" ]]; then
 		repo=cr
 	fi
+	
 	if [[ ! -e ${RepoDIR}/CentOS-Linux-${REPO}.repo ]]; then
 		echo "No -Linux- repo for $repo : creating link..."
 		ln -s ${RepoDIR}/CentOS-Stream-${REPO}.repo ${RepoDIR}/CentOS-Linux-${REPO}.repo
 		target=${RepoDIR}/CentOS-Linux-${REPO}.repo
 		echo "the target is $target"
+
 	# update to centos-vault repos; choose preferred:
 		# sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e "/^\[$repo\]/a baseurl=https://mirror.rackspace.com/centos-vault/8.5.2111/$REPO/\$basearch/os" $target
 		sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e "/^\[$repo\]/a baseurl=https://vault.centos.org/8.5.2111/$REPO/\$basearch/os" $target		
 
-	# NOTE: Extras package does not work out of the box due to upper-case; here's the fix:
+	# Above edited from this samples:
+	# sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e '/^\[baseos\]/a baseurl=https://mirror.rackspace.com/centos-vault/8.5.2111/BaseOS/$basearch/os' /etc/yum.repos.d/CentOS-Linux-BaseOS.repo 
+
+	# NOTE: Extras package does not work out of the box due to upper-case; here's the hack/fix:
 		if [[ $REPO == Extras ]]; then
 			sed -i -e "s/\/$REPO\//\/$repo\//" $target
 		fi
 	fi
 done
-
-	# Above edited from these samples:
-	# sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e '/^\[baseos\]/a baseurl=https://mirror.rackspace.com/centos-vault/8.5.2111/BaseOS/$basearch/os' /etc/yum.repos.d/CentOS-Linux-BaseOS.repo 
-	#sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e '/^\[baseos\]/a baseurl=https://mirror.rackspace.com/centos-vault/8.5.2111/BaseOS/$basearch/os' /etc/yum.repos.d/CentOS-Linux-BaseOS.repo 
-
-	# PLEASE NOTE: certain repositories, like ContinuousRelease or HighAvailability may not work with the above due to differing names:
-	# sed -i -e 's/mirrorlist=http/#mirrorlist=http/g' -e '/^\[cr\]/a baseurl=https://mirror.rackspace.com/centos-vault/8.5.2111/ContinuousRelease/$basearch/os' /etc/yum.repos.d/CentOS-Linux-ContinuousRelease.repo
-	# in the above for loop is an example of how to work around this.
 
 
 # remove packages not in base RHEL
@@ -155,11 +174,6 @@ else
 	echo "It seems the system did not revert as designed.  \b
 	Review the above output for more information and adjust this script accordingly. "
 fi
-
-
-# continue on with https://github.com/AlmaLinux/almalinux-deploy
-# almalinux-deploy.sh
-
 
 
 exit 0
