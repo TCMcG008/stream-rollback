@@ -17,7 +17,7 @@ USE:
 1.  take a snap shot || back-up of the CentOS Stream environment
 2.  dowload the script
 3.  chmod +x stream-rollback.sh
-4.  as root-level user, execute the script
+4.  as root-level user, execute the script \n
         ./stream-rollback.sh [options]
 6.  reboot the system
 5.  if successfully rolled-back, manually execute the deployment script of the RHEL clone
