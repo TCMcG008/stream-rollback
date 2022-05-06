@@ -71,7 +71,7 @@ if [[ $# > 0 ]]; then
 		-R|--rocky)		RHEL_Clone='Rocky Linux'
 						RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
 						;;
-		-A|--alma)		RHEL_Clone='AlmaLinux' 
+		-A|--alma)		RHEL_Clone='AlmaLinux'
 						RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
 						;;
 		*)				echo "Not a valid option; exiting... "
