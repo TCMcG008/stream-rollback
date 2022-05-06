@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#   stream-rollback.sh          version: 2022-05-05A                          #
+#   stream-rollback.sh          version: 2022-05-05B                          #
 #   created by TCMcG008                                                       #
 #                                                                             #
 #   based on stream2alma.sh     version: 2022-03-27                           #
@@ -14,7 +14,7 @@
 #     script to:                                                              #
 #       1. roll CentOS Stream back to CentOS 8.5                              #
 #       2. fix EDD 'bugs' in grub.cfg                                         #
-#       3. [optional] download a RHEL-clone installation script               # 
+#       3. [optional] download a RHEL-clone installation script               #
 #                                                                             #
 #   references:                                                               #
 #     https://www.linuxquestions.org/questions/linux-virtualization-and-cloud-90/probing-edd-edd-off-to-disable-ok-4175607672/
@@ -37,20 +37,20 @@ usage () {
 		3. luck
 
  	$PROGNAME	script to convert a CentOS Stream environment to a stable Alma machine
- 
+
 	$PROGNAME [ -h | --help | -R | --rocky | -A | --alma ]
 		-h | --help     prints this menu
 		-R | --rocky    downloads the current Rocky Linux deployment script
 		-A | --alma     downloads the current AlmaLinux deployment script
-		
+
 	NOTE: the script will only d/l the choice; it will not install it.  This must \
-	be done manually, after reboot.  
+	be done manually, after reboot.
 
 	reference materials for this script:
 	https://gist.github.com/grizz/e3668652c0f0b121118ce37d29b06dbf
 	https://forums.centos.org/viewtopic.php?t=71648
 	https://www.linuxquestions.org/questions/linux-virtualization-and-cloud-90/probing-edd-edd-off-to-disable-ok-4175607672/
-		
+
 EOF
  	return
 }
@@ -81,11 +81,11 @@ if [[ $# > 0 ]]; then
 	esac
 fi
 
-if [[ $RHEL_CLONE ]]; then 
+if [[ $RHEL_CLONE ]]; then
 	if [[ ! `which wget` ]]; then
 		yum -y install wget
 	fi
-	
+
 	cd ~/bin
 	echo "Downloading the deployment script for $RHEL_CLONE ..."
 	wget $RURL_Clone
@@ -111,7 +111,7 @@ for REPO in $REPOS; do
 	if [[ $REPO == "ContinuousRelease" ]]; then
 		repo=cr
 	fi
-	
+
 	if [[ ! -e ${RepoDIR}/CentOS-Linux-${REPO}.repo ]]; then
 		echo "No -Linux- repo for $repo : creating link..."
 		ln -s ${RepoDIR}/CentOS-Stream-${REPO}.repo ${RepoDIR}/CentOS-Linux-${REPO}.repo
