@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#   stream-rollback.sh          version: 2022-05-05B                          #
+#   stream-rollback.sh          version: 2022-05-05C                          #
 #   created by TCMcG008                                                       #
 #                                                                             #
 #   based on stream2alma.sh     version: 2022-03-27                           #
@@ -71,7 +71,7 @@ if [[ $# > 0 ]]; then
 		-R|--rocky)		RHEL_Clone='Rocky Linux'
 						RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
 						;;
-		-A|--alma)		RHEL_Clone='AlmaLinux'
+		-A|--alma)		RHEL_Clone='AlmaLinux' 
 						RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
 						;;
 		*)				echo "Not a valid option; exiting... "
@@ -81,13 +81,13 @@ if [[ $# > 0 ]]; then
 	esac
 fi
 
-if [[ $RHEL_CLONE ]]; then
+if [[ $RHEL_Clone ]]; then
 	if [[ ! `which wget` ]]; then
 		yum -y install wget
 	fi
 
 	cd ~/bin
-	echo "Downloading the deployment script for $RHEL_CLONE ..."
+	echo "Downloading the deployment script for $RHEL_Clone ..."
 	wget $RURL_Clone
 	chmod +x `basename ${RURL_Clone}`
 	cd -
