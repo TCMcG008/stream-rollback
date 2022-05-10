@@ -69,22 +69,22 @@ fi
 if [[ $# > 0 ]]; then
 	case "${1}" in
 		-h|--help)	usage >&2
-					exit 3
-					;;
+				exit 3
+				;;
 		-R|--rocky)	RHEL_Clone='Rocky Linux'
-					RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
-					;;
+				RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
+				;;
 		-A|--alma)	RHEL_Clone='AlmaLinux'
-					RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
-					;;
+				RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
+				;;
 		-RH|--redhat)	RHEL_Clone='Red Hat Enterprise Linux'
-					RHEL_Release=`egrep ^VERSION_ID /etc/os-release | sed -e 's/^.*="//' -e 's/".*$//' | sed -e 's/\..*$//'`
-					RURL_Clone="https://ftp.redhat.com/redhat/convert2rhel/${RHEL_Release}/convert2rhel.repo"
-					;;
-		*)			echo "Not a valid option; exiting... "
-					usage >&2
-					exit 3
-					;;
+				RHEL_Release=`egrep ^VERSION_ID /etc/os-release | sed -e 's/^.*="//' -e 's/".*$//' | sed -e 's/\..*$//'`
+				RURL_Clone="https://ftp.redhat.com/redhat/convert2rhel/${RHEL_Release}/convert2rhel.repo"
+				;;
+		*)		echo "Not a valid option; exiting... "
+				usage >&2
+				exit 3
+				;;
 	esac
 fi
 
