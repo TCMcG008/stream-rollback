@@ -5,12 +5,12 @@ project to assist Linux Administrators / Users who have gone just a bit too far 
 
 This script aims to:
   1.  safely roll-back from CentOS Stream to the latest stable version of CentOS Linux (8.5.2111 as of this writing).
-  2.  [optional] download the latest migration package of RHEL-based alternatives
+  2.  [optional] download the latest migration package of RHEL-based alternatives \b
 		(currently AlmaLinux, Rocky Linux, or official RHEL)
 
 Updated to include option to down-load RHEL-clone deployment script.  
 
-Thanks goes out to Matt Griswold (grizz here at github) for creating the foundation upon which this project is built. 
+Thanks goes out to Matt Griswold (grizz here at github) for creating the foundation upon which this project is built. \b
     < https://gist.github.com/grizz/e3668652c0f0b121118ce37d29b06dbf >
 
 
