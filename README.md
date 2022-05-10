@@ -5,7 +5,8 @@ project to assist Linux Administrators / Users who have gone just a bit too far 
 
 This script aims to:
   1.  safely roll-back from CentOS Stream to the latest stable version of CentOS Linux (8.5.2111 as of this writing).
-  2.  download the latest AlmaLinux-deploy.sh script
+  2.  [optional] download the latest migration package of RHEL-based alternatives
+		(currently AlmaLinux, Rocky Linux, or official RHEL)
 
 Updated to include option to down-load RHEL-clone deployment script.  
 
@@ -17,8 +18,8 @@ USE:
 1.  take a snap shot || back-up of the CentOS Stream environment
 2.  dowload the script
 3.  chmod +x stream-rollback.sh
-4.  as root-level user, execute the script: <br />
+4.  as root-level user, execute the script
         ./stream-rollback.sh [options]
-5.  reboot the system
-6.  if successfully rolled-back, manually execute the deployment script of the RHEL clone
+6.  reboot the system
+5.  if successfully rolled-back, manually execute the deployment script of the RHEL clone
 
