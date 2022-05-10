@@ -23,3 +23,5 @@ USE:
 6.  reboot the system
 5.  if successfully rolled-back, manually execute the deployment script of the RHEL clone
 
+ Please NOTE: this software comes free-of-charge with absolutely no warranty whatsoever.
+When in doubt, back it up!
