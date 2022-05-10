@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#   stream-rollback.sh          version: 2022-05-07A                          #
+#   stream-rollback.sh          version: 2022-05-10A                          #
 #   created by TCMcG008                                                       #
 #                                                                             #
 #   based on stream2alma.sh     version: 2022-03-27                           #
@@ -19,6 +19,7 @@
 #   references:                                                               #
 #     https://www.linuxquestions.org/questions/linux-virtualization-and-cloud-90/probing-edd-edd-off-to-disable-ok-4175607672/
 #     https://forums.centos.org/viewtopic.php?t=71648                         #
+#     https://computingforgeeks.com/how-to-convert-centos-8-to-rhel-8-server/ #
 #                                                                             #
 ###############################################################################
 
@@ -42,6 +43,7 @@ usage () {
 		-h | --help     prints this menu
 		-R | --rocky    downloads the current Rocky Linux deployment script
 		-A | --alma     downloads the current AlmaLinux deployment script
+		-RH| --redhat	downloads the current version of Convert2RHEL script
 
 	NOTE: the script will only d/l the choice; it will not install it.  This must \
 	be done manually, after reboot.
@@ -50,6 +52,7 @@ usage () {
 	https://gist.github.com/grizz/e3668652c0f0b121118ce37d29b06dbf
 	https://forums.centos.org/viewtopic.php?t=71648
 	https://www.linuxquestions.org/questions/linux-virtualization-and-cloud-90/probing-edd-edd-off-to-disable-ok-4175607672/
+	https://computingforgeeks.com/how-to-convert-centos-8-to-rhel-8-server/
 
 EOF
  	return
@@ -66,18 +69,22 @@ fi
 if [[ $# > 0 ]]; then
 	case "${1}" in
 		-h|--help)	usage >&2
-				exit 3
-				;;
+					exit 3
+					;;
 		-R|--rocky)	RHEL_Clone='Rocky Linux'
-				RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
-				;;
-		-A|--alma)	RHEL_Clone='AlmaLinux' 
-				RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
-				;;
-		*)		echo "Not a valid option; exiting... "
-				usage >&2
-				exit 3
-				;;
+					RURL_Clone='https://raw.githubusercontent.com/rocky-linux/rocky-tools/main/migrate2rocky/migrate2rocky.sh'
+					;;
+		-A|--alma)	RHEL_Clone='AlmaLinux'
+					RURL_Clone='https://raw.githubusercontent.com/AlmaLinux/almalinux-deploy/master/almalinux-deploy.sh'
+					;;
+		-RH|--redhat)	RHEL_Clone='Red Hat Enterprise Linux'
+					RHEL_Release=`egrep ^VERSION_ID /etc/os-release | sed -e 's/^.*="//' -e 's/".*$//' | sed -e 's/\..*$//'`
+					RURL_Clone="https://ftp.redhat.com/redhat/convert2rhel/${RHEL_Release}/convert2rhel.repo"
+					;;
+		*)			echo "Not a valid option; exiting... "
+					usage >&2
+					exit 3
+					;;
 	esac
 fi
 
@@ -88,8 +95,15 @@ if [[ $RHEL_Clone ]]; then
 
 	cd ~/bin
 	echo "Downloading the deployment script for $RHEL_Clone ..."
-	wget $RURL_Clone
-	chmod +x `basename ${RURL_Clone}`
+	if [[ $RHEL_Clone == 'Red Hat Enterprise Linux' ]]; then
+		curl -o /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release -k https://www.redhat.com/security/data/fd431d51.txt
+		curl --create-dirs -o /etc/rhsm/ca/redhat-uep.pem -k https://ftp.redhat.com/redhat/convert2rhel/redhat-uep.pem
+		curl -o /etc/yum.repos.d/convert2rhel.repo -k $RURL_Clone # https://ftp.redhat.com/redhat/convert2rhel/8/convert2rhel.repo
+		yum -y install convert2rhel
+	else
+		wget $RURL_Clone
+		chmod +x `basename ${RURL_Clone}`
+	fi
 	cd -
 else
 	echo "No RHEL Clone chosen.  Proceeding ..."
@@ -166,6 +180,12 @@ fi
 
 if [[ `grep 'CentOS Linux' /etc/redhat-release` ]]; then
 	echo "The system has been successfully rolled back to `cat /etc/redhat-release`."
+	if [[ $RHEL_Clone == 'Red Hat Enterprise Linux' ]]; then
+		echo "You have chosen $RHEL_Clone for your migration target. \b
+		Please note that license keys from Red Hat will be needed to fully activate your \b
+		RHEL system.  More information about Red Hat licenses can be found here: \b
+		  https://www.redhat.com/en/resources/red-hat-enterprise-linux-subscription-guide"
+	fi
 	echo -e "$HOSTNAME will now reboot.  \b
 	After the system comes back up, log back in and confirm it is stable.  \b
 	If it is, create a system snapshot of that stable state before proceeding to \b
