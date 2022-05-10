@@ -37,7 +37,7 @@ usage () {
 	Usage 1: $PROGNAME
 
 	RUNNING:
-	intended for deployment of Canvas-LMS on Red Hat Enterprise v 8.x x86_64;
+	intended for roll-back of a CentOS 8 Stream system to the STABLE 8.5 release;
 	user needs to have:
 		1. root / wheel level access on the local systems
 		2. a snapshot of the system to be update
