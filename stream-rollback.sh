@@ -181,19 +181,19 @@ fi
 if [[ `grep 'CentOS Linux' /etc/redhat-release` ]]; then
 	echo "The system has been successfully rolled back to `cat /etc/redhat-release`."
 	if [[ $RHEL_Clone == 'Red Hat Enterprise Linux' ]]; then
-		echo "You have chosen $RHEL_Clone for your migration target. \b
-		Please note that license keys from Red Hat will be needed to fully activate your \b
-		RHEL system.  More information about Red Hat licenses can be found here: \b
+		echo "You have chosen $RHEL_Clone for your migration target. 
+		Please note that license keys from Red Hat will be needed to fully activate your 
+		RHEL system.  More information about Red Hat licenses can be found here: 
 		  https://www.redhat.com/en/resources/red-hat-enterprise-linux-subscription-guide"
 	fi
-	echo -e "$HOSTNAME will now reboot.  \b
-	After the system comes back up, log back in and confirm it is stable.  \b
-	If it is, create a system snapshot of that stable state before proceeding to \b
-	subsequently run any migration scripts manually.  \b
+	echo -e "$HOSTNAME will now reboot.  
+	After the system comes back up, log back in and confirm it is stable.  
+	If it is, create a system snapshot of that stable state before proceeding to 
+	subsequently run any migration scripts manually.  
 	Best of luck!"
 	reboot
 else
-	echo "It seems the system did not revert as designed.  \b
+	echo "It seems the system did not revert as designed.  
 	Review the above output for more information and adjust this script accordingly. "
 fi
 
